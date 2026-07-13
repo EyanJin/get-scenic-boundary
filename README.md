@@ -8,7 +8,7 @@
 
 ---
 
-## 四种使用方式
+## 六种使用方式
 
 根据你的需求选择：
 
@@ -18,6 +18,8 @@
 | [2. 命令行查询](#2-命令行查询) | 想查个别景区的人 | 需要 Python |
 | [3. Python API](#3-python-api) | 开发者集成到自己项目 | 需要 Python |
 | [4. 批量处理](#4-批量处理) | 有一批景区名单要查 | 需要 Python |
+| [5. 坐标转换工具](#5-坐标转换工具) | 只需要转换坐标系的人 | 需要 Python |
+| [6. AI Skill](#6-ai-skill) | Claude Code / Codex 用户 | 不需要手写代码 |
 
 ---
 
@@ -98,6 +100,48 @@ get-scenic-boundary --batch places.txt -o ./output/
 - `output/_merged.geojson` — 所有结果合并为一个文件
 - `output/_report.txt` — 统计报告（成功/失败/来源分布）
 - 支持**断点续传** — 中断后重新运行会跳过已完成的景区
+
+---
+
+### 5. 坐标转换工具
+
+独立使用，不需要查询边界。**零外部依赖**（仅用 Python 标准库 math）。
+
+支持中国地图服务的所有坐标系互转：百度墨卡托 / BD-09 / GCJ-02 / WGS84。
+
+```bash
+# 命令行转换
+python scripts/convert_coords.py --from gcj02 --to wgs84 120.15 30.25
+
+# 批量转换 CSV
+python scripts/convert_coords.py --from bd09mc --to wgs84 --input coords.csv -o output.csv
+```
+
+```python
+from geoboundary import gcj02_to_wgs84, bd09mc_to_wgs84, wgs84_to_gcj02
+
+lng, lat = gcj02_to_wgs84(120.15, 30.25)     # 高德/腾讯 → GPS
+lng, lat = bd09mc_to_wgs84(13375504, 3509072) # 百度API原始数据 → GPS
+lng, lat = wgs84_to_gcj02(120.15, 30.25)      # GPS → 高德/腾讯
+```
+
+精度 < 0.5 米。详见 [docs/coordinate_systems.md](docs/coordinate_systems.md)。
+
+---
+
+### 6. AI Skill
+
+在 [Claude Code](https://claude.ai/code) 或 Codex 中使用自然语言查询边界：
+
+```
+> 获取西湖风景名胜区的边界数据
+
+> get boundary for 黄山
+```
+
+安装方式：将 `skill/SKILL.md` 添加到你的 AI 工具的 skills 目录。
+
+详见 [skill/SKILL.md](skill/SKILL.md)。
 
 ---
 
