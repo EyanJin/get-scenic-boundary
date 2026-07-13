@@ -40,7 +40,7 @@
 | 3 | [Python API](#方式-3python-api) | 开发者集成 | 需要 Python |
 | 4 | [批量处理](#方式-4批量处理) | 有一批景区要查 | 需要 Python |
 | 5 | [坐标转换](#方式-5坐标转换工具) | 只想转换坐标 | 需要 Python |
-| 6 | [AI 对话](#方式-6ai-skill) | Claude Code 用户 | 用自然语言 |
+| 6 | [AI 对话](#方式-6ai-skill) | AI 编程助手用户 | 用自然语言 |
 
 ---
 
@@ -148,7 +148,7 @@ python scripts/convert_coords.py --from bd09mc --to wgs84 --input data.csv -o re
 
 ### 方式 6：AI Skill
 
-> 在 Claude Code 中用自然语言查询。
+> 在 AI 编程助手中用自然语言查询边界。支持 Claude Code、Codex、Cursor 等。
 
 ```
 你: 获取西湖风景名胜区的边界数据
@@ -158,7 +158,10 @@ AI: [自动调用 get_boundary，返回 GeoJSON]
 AI: [returns GeoJSON polygon with 256 coordinates]
 ```
 
-安装：将 [`skill/SKILL.md`](skill/SKILL.md) 添加到你的 Claude Code skills 目录。
+安装方式：将 [`skill/SKILL.md`](skill/SKILL.md) 复制到你的 AI 编程工具的 skills 目录：
+- **Claude Code**: `~/.claude/skills/`
+- **Codex / Cursor**: 对应的自定义指令或 skills 目录
+- **其他 AI 工具**: 将 SKILL.md 内容作为系统提示词或工具描述
 
 ---
 
@@ -231,53 +234,115 @@ A tool and dataset for **Chinese scenic area (风景名胜区) boundary polygons
 - **Dataset**: 1004 scenic areas with polygon boundaries (99.1% coverage)
 - **Tool**: Input a scenic area name → get its boundary as GeoJSON
 
-### Download the Dataset (No Coding Required)
+### Six Ways to Use
+
+| # | Method | For | Coding? |
+|---|--------|-----|---------|
+| 1 | [Download data](#1-download-dataset) | Just want the data | No |
+| 2 | [CLI query](#2-cli-query) | Look up one area | Python |
+| 3 | [Python API](#3-python-api-1) | Integrate into your project | Python |
+| 4 | [Batch processing](#4-batch-processing) | Query a list of areas | Python |
+| 5 | [Coordinate conversion](#5-coordinate-conversion) | Convert between Chinese map CRS | Python |
+| 6 | [AI Skill](#6-ai-skill-1) | Natural language queries | No code |
+
+---
+
+#### 1. Download Dataset
+
+No coding required. Get the boundary data in 2 minutes:
 
 1. Go to [Releases](https://github.com/EyanJin/get-scenic-boundary/releases)
 2. Download `scenic_areas_wgs84.geojson`
-3. Drag into [geojson.io](https://geojson.io) to visualize on a map
+3. Drag into [geojson.io](https://geojson.io) to see all 1004 boundaries on a map
 
-### Install the Tool
+Also works with [QGIS](https://qgis.org) (free), ArcGIS, Python, R, JavaScript.
+
+---
+
+#### 2. CLI Query
 
 ```bash
+# Install (one time)
 pip install get-scenic-boundary[baidu]
 playwright install chromium
+
+# Query with browser preview
+get-scenic-boundary "西湖风景名胜区" --open
+
+# Save to file
+get-scenic-boundary "黄山" -o huangshan.geojson
+
+# Specify coordinate system (default WGS84)
+get-scenic-boundary "庐山" --crs gcj02
 ```
 
-### Query a Scenic Area
+---
 
-```bash
-get-scenic-boundary "West Lake Scenic Area" --open
-get-scenic-boundary "黄山风景名胜区" -o huangshan.geojson
-```
-
-### Python API
+#### 3. Python API
 
 ```python
 from geoboundary import get_boundary
 
 result = get_boundary("西湖风景名胜区", crs="wgs84")
-# Returns GeoJSON Feature with Polygon geometry
+print(result['geometry']['type'])       # "Polygon"
+print(result['properties']['source'])   # "baidu"
 ```
 
-### Coordinate Conversion
+Returns standard GeoJSON Feature. Works with geopandas, folium, leaflet, etc.
 
-```python
-from geoboundary import gcj02_to_wgs84, bd09mc_to_wgs84
+---
 
-# Chinese GCJ-02 (Amap/Tencent) → WGS84 (GPS)
-lng, lat = gcj02_to_wgs84(120.15, 30.25)
-
-# Baidu Mercator → WGS84
-lng, lat = bd09mc_to_wgs84(13375504, 3509072)
-```
-
-### Batch Processing
+#### 4. Batch Processing
 
 ```bash
 get-scenic-boundary --batch places.txt -o ./output/
-# Auto-resume on interruption, generates merged GeoJSON + report
 ```
+
+Output:
+- Individual `.geojson` per area
+- `_merged.geojson` — all results combined
+- `_report.txt` — statistics
+- Auto-resumes on interruption (skips completed items)
+
+---
+
+#### 5. Coordinate Conversion
+
+Zero external dependencies. Sub-meter accuracy (< 0.5m).
+
+```python
+from geoboundary import gcj02_to_wgs84, bd09mc_to_wgs84, wgs84_to_gcj02
+
+# Amap/Tencent (GCJ-02) → GPS (WGS84)
+lng, lat = gcj02_to_wgs84(120.15, 30.25)
+
+# Baidu API raw data → GPS
+lng, lat = bd09mc_to_wgs84(13375504, 3509072)
+
+# GPS → Amap/Tencent
+lng, lat = wgs84_to_gcj02(120.15, 30.25)
+```
+
+CLI version:
+
+```bash
+python scripts/convert_coords.py --from gcj02 --to wgs84 120.15 30.25
+```
+
+---
+
+#### 6. AI Skill
+
+Use natural language to query boundaries in AI coding tools (Claude Code, Codex, Cursor, etc.):
+
+```
+You: get boundary for West Lake scenic area
+AI: [calls get_boundary, returns GeoJSON polygon]
+```
+
+Install: copy [`skill/SKILL.md`](skill/SKILL.md) to your AI tool's skills directory.
+
+---
 
 ### Data Sources
 
@@ -289,6 +354,21 @@ get-scenic-boundary --batch places.txt -o ./output/
 
 Auto mode tries sources in coverage order: Baidu → Amap → OSM.
 
+### Installation
+
+```bash
+# Recommended (Baidu source, highest coverage)
+pip install get-scenic-boundary[baidu]
+playwright install chromium
+
+# Basic (OSM only, ~20% coverage)
+pip install get-scenic-boundary
+
+# All features (all sources + Shapefile export)
+pip install get-scenic-boundary[all]
+playwright install chromium
+```
+
 ### Documentation
 
 - [Coordinate Systems](docs/coordinate_systems.md) — BD-09 / GCJ-02 / WGS84 explained
@@ -296,4 +376,4 @@ Auto mode tries sources in coverage order: Baidu → Amap → OSM.
 
 ### License
 
-MIT
+Code: MIT. OSM-sourced data: [ODbL](https://opendatacommons.org/licenses/odbl/).
