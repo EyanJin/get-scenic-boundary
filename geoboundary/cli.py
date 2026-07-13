@@ -15,17 +15,16 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser(
-        prog='geoboundary',
-        description='Get boundary polygon for any place name from map services.\n'
-                    '地名边界获取工具 — 从地图服务获取任意地名的边界多边形',
+        prog='get-scenic-boundary',
+        description='Get boundary polygons for Chinese scenic areas from map services.\n'
+                    '中国风景名胜区边界数据获取工具',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-  geoboundary "西湖风景名胜区"
-  geoboundary "黄山" --source baidu --crs gcj02
-  geoboundary "黄山" -o huangshan.geojson
-  geoboundary --batch places.txt -o ./boundaries/
-  geoboundary "West Lake" --source osm
+  get-scenic-boundary "西湖风景名胜区"
+  get-scenic-boundary "黄山" --source baidu --crs gcj02
+  get-scenic-boundary "黄山" -o huangshan.geojson
+  get-scenic-boundary --batch places.txt -o ./boundaries/
 
 Sources:
   auto (default)  Try Baidu → Amap → OSM (highest coverage first)

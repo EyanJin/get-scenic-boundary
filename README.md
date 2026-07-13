@@ -1,209 +1,153 @@
-# geoboundary
+# get-scenic-boundary
 
-Get boundary polygon for any place name from map services.
+**中国风景名胜区边界数据获取工具** — 输入景区名，获取边界多边形。
 
-地名边界获取工具 — 输入地名，获取该地点的边界多边形数据。
+Get boundary polygons for Chinese scenic areas from map services.
 
-[中文文档](README_CN.md)
-
----
-
-## What does it do? / 这是什么？
-
-Input a place name → get its boundary shape, ready for mapping.
-
-```
-"西湖风景名胜区" → Polygon with 143 coordinate points → visualize on any map
-```
-
-**Example output** (drag any `.geojson` file into [geojson.io](https://geojson.io) to see it on a map instantly):
-
-```json
-{
-  "type": "Feature",
-  "geometry": { "type": "Polygon", "coordinates": [[[120.12, 30.22], ...]] },
-  "properties": { "name": "西湖风景名胜区", "source": "baidu" }
-}
-```
-
-**Use cases:**
-- Academic research: get park/scenic area boundaries for spatial analysis
-- Data journalism: map boundaries for stories about places
-- Urban planning: quick boundary reference data
-- Education: teach GIS concepts with real data
+[中文](#中文) · [English](#english)
 
 ---
 
-## No Code Required: Pre-built Dataset / 无需编程：直接下载数据
+## 核心数据
 
-The [Releases](https://github.com/EyanJin/geoboundary/releases) page includes boundary data for **1013 Chinese scenic areas** — just download and use:
-
-1. Go to [Releases](https://github.com/EyanJin/geoboundary/releases)
-2. Download `scenic_areas_wgs84.geojson`
-3. Open it:
-   - **Quick preview**: drag into [geojson.io](https://geojson.io)
-   - **Desktop GIS**: open in [QGIS](https://qgis.org) (free)
-   - **Google Earth**: convert to KML with online tools
-   - **Programming**: load with Python, R, or JavaScript
+**1004 个景区** 的完整边界多边形 | 覆盖率 **99.1%** (1004/1013) | 输出 GeoJSON / Shapefile
 
 ---
 
-## Features
+## 最快使用方式：直接下载
 
-- Multi-source: OpenStreetMap, Baidu Maps, Amap (高德地图)
-- Coordinate systems: WGS84, GCJ-02, BD-09, BD-09 MC
-- Output formats: GeoJSON, Shapefile, CSV/WKT
-- Three usage modes: pip package, standalone scripts, AI Skill
-- Pre-built dataset: 1013 Chinese National/Provincial Scenic Areas (see [Releases](https://github.com/EyanJin/geoboundary/releases))
+不需要编程。[Releases](https://github.com/EyanJin/get-scenic-boundary/releases) 页面有现成数据：
 
-## Quick Start
+1. 下载 [`scenic_areas_wgs84.geojson`](https://github.com/EyanJin/get-scenic-boundary/releases)
+2. 拖入 [geojson.io](https://geojson.io) → 立即看到 1004 个景区在地图上的边界
+
+也可以用 [QGIS](https://qgis.org)（免费桌面 GIS）或任何支持 GeoJSON 的工具打开。
+
+---
+
+## 命令行查询单个景区
 
 ```bash
-pip install geoboundary
-geoboundary "西湖风景名胜区"
+pip install get-scenic-boundary[baidu]
+playwright install chromium
+
+get-scenic-boundary "西湖风景名胜区" --open    # 自动在浏览器中预览
+get-scenic-boundary "黄山" -o huangshan.geojson  # 保存到文件
 ```
 
-### Python API
+## Python API
 
 ```python
 from geoboundary import get_boundary
 
 result = get_boundary("西湖风景名胜区")
-print(result['geometry']['type'])  # Polygon
+# → GeoJSON Feature: { "type": "Feature", "geometry": {"type": "Polygon", ...} }
 ```
 
-### Without installing (clone & run)
+## 批量查询
 
 ```bash
-git clone https://github.com/EyanJin/geoboundary.git
-cd geoboundary
-
-# Basic (OSM only):
-pip install -r requirements.txt
-
-# Full (all sources including Baidu):
-pip install -r requirements-full.txt
-playwright install chromium
-
-python scripts/query_single.py "西湖风景名胜区"
-python scripts/query_single.py "西湖" --open    # preview in browser
+get-scenic-boundary --batch places.txt -o ./output/
+# 自动断点续传，生成合并 GeoJSON + 统计报告
 ```
 
-## Installation
+---
+
+## 数据来源与覆盖率
+
+| 来源 | 方式 | 覆盖率 | 坐标系 |
+|------|------|--------|--------|
+| 百度地图 | 浏览器自动化 | ~95% | BD-09 MC → WGS84 |
+| 高德地图 | REST API | ~60% | GCJ-02 → WGS84 |
+| OpenStreetMap | Overpass API | ~20% | WGS84 |
+
+`auto` 模式按覆盖率从高到低尝试：百度 → 高德 → OSM。
+
+## 坐标系
+
+输出默认 **WGS84**（GPS/国际标准）。也支持 GCJ-02（高德/腾讯）。
+
+所有转换精度 < 0.5 米。详见 [docs/coordinate_systems.md](docs/coordinate_systems.md)。
+
+## 安装选项
 
 ```bash
-# Basic (OSM source, coordinate transforms)
-pip install geoboundary
-
-# With Baidu Maps support (requires Playwright)
-pip install geoboundary[baidu]
-playwright install chromium
-
-# With Shapefile export
-pip install geoboundary[export]
-
-# All features
-pip install geoboundary[all]
+pip install get-scenic-boundary           # 基础（OSM）
+pip install get-scenic-boundary[baidu]    # 含百度（推荐，覆盖率最高）
+pip install get-scenic-boundary[all]      # 全部功能
 ```
 
-## Usage
-
-### CLI
+或者直接克隆：
 
 ```bash
-# Simple query (outputs GeoJSON to stdout)
-geoboundary "黄山"
-
-# Specify source and coordinate system
-geoboundary "黄山" --source baidu --crs gcj02
-
-# Save to file
-geoboundary "黄山" -o huangshan.geojson
-
-# Batch mode
-geoboundary --batch places.txt -o ./boundaries/
+git clone https://github.com/EyanJin/get-scenic-boundary.git
+cd get-scenic-boundary
+pip install -r requirements-full.txt && playwright install chromium
+python scripts/query_single.py "西湖" --open
 ```
 
-### Python API
+## 配置
 
-```python
-from geoboundary import get_boundary, batch_query
+百度源无需配置。高德源需要免费 API Key：
 
-# Single query
-feature = get_boundary("庐山", source="auto", crs="wgs84")
-
-# Batch query
-results = batch_query(["西湖", "黄山", "庐山"], output_dir="./output")
+```bash
+# .env
+AMAP_API_KEY=your_key    # 免费申请：https://lbs.amap.com/dev/key
 ```
 
-### Coordinate Transforms (zero dependencies)
+---
 
-```python
-from geoboundary import gcj02_to_wgs84, bd09mc_to_wgs84, wgs84_to_gcj02
+## 适用场景
 
-# GCJ-02 (Amap/高德) → WGS84
-lng, lat = gcj02_to_wgs84(120.15, 30.25)
+- 学术研究：空间分析、生态研究的景区边界底图
+- 数据新闻：可视化景区范围
+- GIS 教学：真实边界数据教学素材
+- 旅游应用：景区范围展示
 
-# Baidu Mercator → WGS84
-lng, lat = bd09mc_to_wgs84(13375504.53, 3509072.67)
-```
+## 数据来源说明
 
-## Data Sources
+数据通过公开地图服务获取：
+- **百度地图** — 中国景区边界主要来源
+- **高德地图** — 公开 REST API
+- **OpenStreetMap** — [ODbL](https://opendatacommons.org/licenses/odbl/) 许可
 
-| Source | Method | API Key | Coordinates | Speed |
-|--------|--------|---------|-------------|-------|
-| OSM | Overpass API | Not needed | WGS84 | Fast |
-| Amap | REST API + Browser | Required (free) | GCJ-02 | Medium |
-| Baidu | Browser automation | Not needed | BD-09 MC | Slow |
-
-In `auto` mode, sources are tried in order: Baidu → Amap → OSM (highest coverage first).
-
-## Configuration
-
-Create a `.env` file (see `.env.example`):
-
-```env
-AMAP_API_KEY=your_key_here
-```
-
-Get a free Amap key at https://lbs.amap.com/dev/key
-
-## Pre-built Dataset
-
-The [Releases](https://github.com/EyanJin/geoboundary/releases) page includes boundary data for **1013 Chinese National/Provincial Scenic Areas** (风景名胜区):
-
-- `scenic_areas_wgs84.geojson` — WGS84 coordinates
-- `scenic_areas_gcj02.geojson` — GCJ-02 coordinates
-- `scenic_areas.shp.zip` — Shapefile format
-- `scenic_areas_metadata.csv` — Metadata (name, grade, province, source)
-
-Coverage: 1004/1013 (99.1%) with polygon boundaries.
-
-## Coordinate Systems
-
-| System | Used By | Notes |
-|--------|---------|-------|
-| WGS84 | GPS, OSM, international | Default output |
-| GCJ-02 | Amap, Tencent Maps, Chinese law | Required for China map services |
-| BD-09 | Baidu Maps | Baidu's proprietary offset |
-| BD-09 MC | Baidu Maps API responses | Mercator projection |
-
-All conversions achieve sub-meter accuracy (< 0.5m for GCJ-02 ↔ WGS84).
-
-## Data Attribution
-
-Boundary data is collected from publicly accessible map services:
-- **Baidu Maps** (百度地图) — primary source for Chinese POI boundaries
-- **Amap** (高德地图) — secondary source via public REST API
-- **OpenStreetMap** — tertiary source, [ODbL](https://opendatacommons.org/licenses/odbl/) licensed
-
-OSM-sourced boundaries are subject to the Open Database License (ODbL).
-Each feature's `source` property indicates its origin.
-
-## AI Skill
-
-This project includes an AI Skill definition (`skill/SKILL.md`) for use with Claude Code or Codex. Install as a skill to enable natural language boundary queries.
+每个要素的 `source` 字段标识其来源。
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+<a name="english"></a>
+
+## English
+
+### What is this?
+
+A tool + dataset for Chinese scenic area boundaries. Input a scenic area name → get its boundary polygon as GeoJSON.
+
+**Dataset**: 1004 scenic areas with polygon boundaries (99.1% coverage). Download from [Releases](https://github.com/EyanJin/get-scenic-boundary/releases).
+
+**Tool**: Query boundaries programmatically via CLI or Python API.
+
+### Quick Start
+
+```bash
+pip install get-scenic-boundary[baidu]
+playwright install chromium
+get-scenic-boundary "West Lake" --open
+```
+
+```python
+from geoboundary import get_boundary
+result = get_boundary("黄山风景名胜区", crs="wgs84")
+```
+
+### Data Sources
+
+Sources tried in order (highest coverage first): Baidu Maps (~95%) → Amap (~60%) → OSM (~20%).
+
+All coordinates converted to WGS84 by default. Sub-meter accuracy (< 0.5m).
+
+See [docs/data_sources.md](docs/data_sources.md) and [docs/coordinate_systems.md](docs/coordinate_systems.md) for details.

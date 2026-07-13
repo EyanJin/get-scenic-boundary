@@ -3,14 +3,14 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "geoboundary"
+name = "get-scenic-boundary"
 version = "0.1.0"
-description = "Get boundary polygon for any place name from map services / 地名边界获取工具"
+description = "Get boundary polygons for Chinese scenic areas from map services / 中国风景名胜区边界数据获取工具"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
 authors = [{ name = "Eyan Jin" }]
-keywords = ["gis", "boundary", "geojson", "shapefile", "china", "coordinates", "gcj02", "bd09", "wgs84"]
+keywords = ["gis", "boundary", "geojson", "shapefile", "china", "scenic-area", "coordinates", "gcj02", "wgs84"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -36,12 +36,12 @@ all = ["playwright>=1.40", "geopandas>=0.14", "fiona>=1.9"]
 dev = ["pytest>=7.0", "pytest-cov>=4.0"]
 
 [project.scripts]
-geoboundary = "geoboundary.cli:main"
+get-scenic-boundary = "geoboundary.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/EyanJin/geoboundary"
-Repository = "https://github.com/EyanJin/geoboundary"
-Issues = "https://github.com/EyanJin/geoboundary/issues"
+Homepage = "https://github.com/EyanJin/get-scenic-boundary"
+Repository = "https://github.com/EyanJin/get-scenic-boundary"
+Issues = "https://github.com/EyanJin/get-scenic-boundary/issues"
 
 [tool.setuptools.packages.find]
 include = ["geoboundary*"]
