@@ -42,3 +42,4 @@ test-results/
 htmlcov/
 .coverage
 .coverage.*
+release/
