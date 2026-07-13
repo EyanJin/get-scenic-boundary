@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data (working files)
+data/
+*.network-response
+*.network-request
+*.log
+
+# Output (users regenerate locally)
+output/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Playwright
+playwright-report/
+test-results/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*

@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geoboundary"
+version = "0.1.0"
+description = "Get boundary polygon for any place name from map services / 地名边界获取工具"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [{ name = "Eyan Jin" }]
+keywords = ["gis", "boundary", "geojson", "shapefile", "china", "coordinates", "gcj02", "bd09", "wgs84"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+
+dependencies = [
+    "shapely>=2.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+baidu = ["playwright>=1.40"]
+export = ["geopandas>=0.14", "fiona>=1.9"]
+all = ["playwright>=1.40", "geopandas>=0.14", "fiona>=1.9"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0"]
+
+[project.scripts]
+geoboundary = "geoboundary.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/EyanJin/geoboundary"
+Repository = "https://github.com/EyanJin/geoboundary"
+Issues = "https://github.com/EyanJin/geoboundary/issues"
+
+[tool.setuptools.packages.find]
+include = ["geoboundary*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
